@@ -1,26 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Suspense, lazy } from 'react';
+import { UsageProvider, UsageContext } from './contexts/UsageContext';
+import { Loader } from './components/Loader'
 
-function App() {
+import styles from './App.module.scss'
+
+
+
+const UsageChart = lazy(() => import('./components/UsageChart'));
+const Filters = lazy(() => import('./components/Filters'));
+
+const AppContent = () => {
+  const context = React.useContext(UsageContext);
+
+  if (!context) {
+    return <div>error</div>
+  }
+
+  const { loading } = context;
+
+  if (loading) {
+    return (
+      <Loader />
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Suspense
+        fallback={
+          <Loader />
+        }
+      >
+        <h1>Usage Cost Calculator</h1>
+        <Filters />
+        <div className={styles.graphicContainer}>
+          <UsageChart/>
+        </div>
+      </Suspense>
     </div>
   );
-}
+};
 
-export default App;
+
+export const App = () => {
+  return (
+    <UsageProvider>
+      <AppContent />
+    </UsageProvider>
+  );
+};
